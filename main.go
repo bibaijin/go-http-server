@@ -1,10 +1,13 @@
 package main
 
 import (
+	"flag"
 	"net/http"
 )
 
 func main() {
+	flag.Parse()
+
 	http.HandleFunc("/", handler)
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":8081", nil)
 }
