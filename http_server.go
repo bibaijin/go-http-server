@@ -1,14 +1,16 @@
 package main
 
 import (
-	"fmt"
+	"io"
 	"net/http"
+	"strconv"
 
 	// "github.com/golang/glog"
 )
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	// fmt.Fprintf(w, "Hi there, I love %s.\n", r.URL.Path[1:])
-	fmt.Fprintf(w, "Hello, world")
-	// glog.Info("here")
+	result := "Hello, world.\n"
+	w.Header().Set("Content-type", "type/plain")
+	w.Header().Set("Content-Length", strconv.Itoa(len(result)))
+	io.WriteString(w, result)
 }
