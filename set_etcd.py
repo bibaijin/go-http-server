@@ -32,34 +32,35 @@ def etcd_lain_apps_path(app_name, proc_type, proc_name):
         return "{}/{}/{}.{}.{}".format(ETCD_LAIN_APPS, app_name, app_name,
                 proc_type, proc_name)
 
-def set_etcd(port):
+def set_etcd(port, amount):
     podInfos = []
 
-    containerInfos = [{
-            "Command": ["/server"],
-            "ContainerId": str(id(port)),
-            "ContainerIp": SERVER_IP,
-            "Env": [
-                "LAIN_APPNAME={}".format(SERVER_APPNAME),
-                "LAIN_PROCNAME={}".format(SERVER_PROCNAME),
-                "LAIN_DOMAIN={}".format(LAIN_DOMAIN),
-                "CALICO_IP={}".format(CALICO_IP),
-                "CALICO_PROFILE={}".format(CALICO_PROFILE),
-                ],
-            "Expose": port,
-            "HostInterfaceName": "calicba3eeac301",
-            "NodeIp": "192.168.77.21",
-            "NodeName": "node1",
-            "Volumes": []
-            }]
-    podInfo = {
-            "Annotation": '{"mountpoint": []}',
-            "ContainerInfos": containerInfos,
-            "Dependencies":[],
-            "InstanceNo": 1
-            }
+    for i in range(amount):
+        containerInfos = [{
+                "Command": ["/server"],
+                "ContainerId": str(id(port+i)),
+                "ContainerIp": SERVER_IP,
+                "Env": [
+                    "LAIN_APPNAME={}".format(SERVER_APPNAME),
+                    "LAIN_PROCNAME={}".format(SERVER_PROCNAME),
+                    "LAIN_DOMAIN={}".format(LAIN_DOMAIN),
+                    "CALICO_IP={}".format(CALICO_IP),
+                    "CALICO_PROFILE={}".format(CALICO_PROFILE),
+                    ],
+                "Expose": port+i,
+                "HostInterfaceName": "calicba3eeac301",
+                "NodeIp": "192.168.77.21",
+                "NodeName": "node1",
+                "Volumes": []
+                }]
+        podInfo = {
+                "Annotation": '{"mountpoint": []}',
+                "ContainerInfos": containerInfos,
+                "Dependencies":[],
+                "InstanceNo": 1
+                }
 
-    podInfos.append(podInfo)
+        podInfos.append(podInfo)
 
     procInfo = json.dumps({"PodInfos": podInfos})
     path = etcd_lain_apps_path(SERVER_APPNAME, SERVER_PROCTYPE, SERVER_PROCNAME)
@@ -74,12 +75,14 @@ def rm_etcd():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='set etcd.')
-    parser.add_argument('-p', '--port', type=int, default=8080,
-            help='port')
+    parser.add_argument('-p', '--port', type=int, default=8081,
+                        help='port')
+    parser.add_argument('-n', '--amount', type=int, default=1,
+                        help='amount')
     args = vars(parser.parse_args())
     print(args)
 
     rm_etcd()
-    set_etcd(args['port'])
+    set_etcd(args['port'], args['amount'])
 
     print("set etcd >> done")
